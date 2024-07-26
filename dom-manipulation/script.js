@@ -9,6 +9,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const newQuoteButton = document.getElementById('newQuote');
   const categoryFilter = document.getElementById('categoryFilter');
   const exportQuotesButton = document.getElementById('exportQuotes');
+  const syncStatus = document.getElementById('syncStatus');
+
+  // Mock server URL (using JSONPlaceholder)
+  const serverUrl = 'https://jsonplaceholder.typicode.com/posts';
 
   // Function to show a random quote based on the current filter
   function showRandomQuote() {
@@ -31,6 +35,7 @@ document.addEventListener('DOMContentLoaded', () => {
       document.getElementById('newQuoteText').value = '';
       document.getElementById('newQuoteCategory').value = '';
       populateCategoryFilter();
+      syncWithServer();
       alert('New quote added successfully!');
     } else {
       alert('Please enter both quote text and category.');
@@ -56,6 +61,7 @@ document.addEventListener('DOMContentLoaded', () => {
       quotes.push(...importedQuotes);
       localStorage.setItem('quotes', JSON.stringify(quotes));
       populateCategoryFilter();
+      syncWithServer();
       alert('Quotes imported successfully!');
     };
     fileReader.readAsText(event.target.files[0]);
@@ -73,6 +79,28 @@ document.addEventListener('DOMContentLoaded', () => {
   function filterQuotes() {
     localStorage.setItem('selectedCategory', categoryFilter.value);
     showRandomQuote();
+  }
+
+  // Function to sync local data with server
+  async function syncWithServer() {
+    syncStatus.textContent = 'Syncing with server...';
+
+    try {
+      const response = await fetch(serverUrl);
+      const serverQuotes = await response.json();
+      const serverQuotesFormatted = serverQuotes.map(item => ({ text: item.body, category: 'Server' }));
+
+      // Resolve conflicts by giving precedence to server data
+      quotes = [...serverQuotesFormatted, ...quotes];
+      localStorage.setItem('quotes', JSON.stringify(quotes));
+      populateCategoryFilter();
+      showRandomQuote();
+
+      syncStatus.textContent = 'Sync successful!';
+    } catch (error) {
+      console.error('Error syncing with server:', error);
+      syncStatus.textContent = 'Sync failed!';
+    }
   }
 
   // Event listener for the 'Show New Quote' button
@@ -93,4 +121,7 @@ document.addEventListener('DOMContentLoaded', () => {
   } else {
     showRandomQuote();
   }
+
+  // Periodically sync with the server every 60 seconds
+  setInterval(syncWithServer, 60000);
 });
