@@ -8,14 +8,14 @@ const quotes = [
 // Function to show a random quote
 function showRandomQuote() {
   const filteredQuotes = getFilteredQuotes();
+  const quoteDisplay = document.getElementById("quoteDisplay");
   if (filteredQuotes.length === 0) {
-    document.getElementById("quoteDisplay").innerHTML = "No quotes available for the selected category.";
+    quoteDisplay.textContent = "No quotes available for the selected category.";
     return;
   }
   const randomIndex = Math.floor(Math.random() * filteredQuotes.length);
   const randomQuote = filteredQuotes[randomIndex];
-  const quoteDisplay = document.getElementById("quoteDisplay");
-  quoteDisplay.innerHTML = `${randomQuote.text} - ${randomQuote.category}`;
+  quoteDisplay.textContent = `${randomQuote.text} - ${randomQuote.category}`;
 }
 
 // Function to create and display the form for adding new quotes
@@ -52,7 +52,7 @@ function populateCategories() {
   uniqueCategories.forEach(category => {
     const option = document.createElement('option');
     option.value = category;
-    option.innerText = category;
+    option.textContent = category; // Using textContent to set the text of the option
     categoryFilter.appendChild(option);
   });
   // Restore last selected category filter from local storage
