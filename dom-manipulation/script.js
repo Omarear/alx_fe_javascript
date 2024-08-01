@@ -1,9 +1,57 @@
-// Array of quote objects
-const quotes = [
-  { text: "The best way to predict the future is to create it.", category: "Inspiration" },
-  { text: "Life is 10% what happens to us and 90% how we react to it.", category: "Life" },
-  { text: "Your time is limited, so don’t waste it living someone else’s life.", category: "Motivation" }
+const SERVER_URL = "https://jsonplaceholder.typicode.com/posts"; // Using JSONPlaceholder for simulation
+const SYNC_INTERVAL = 5000; // 5 seconds interval for data sync
+
+// Array of quote objects (initial data)
+let quotes = [
+  { id: 1, text: "The best way to predict the future is to create it.", category: "Inspiration" },
+  { id: 2, text: "Life is 10% what happens to us and 90% how we react to it.", category: "Life" },
+  { id: 3, text: "Your time is limited, so don’t waste it living someone else’s life.", category: "Motivation" }
 ];
+
+// Function to fetch quotes from the server
+async function fetchQuotesFromServer() {
+  try {
+    const response = await fetch(SERVER_URL);
+    const serverQuotes = await response.json();
+    return serverQuotes.map((quote, index) => ({
+      id: index + 1,
+      text: quote.title,
+      category: "Server"
+    }));
+  } catch (error) {
+    console.error("Error fetching quotes from server:", error);
+    return [];
+  }
+}
+
+// Function to sync local quotes with server quotes
+async function syncQuotes() {
+  const serverQuotes = await fetchQuotesFromServer();
+  const serverQuoteIds = new Set(serverQuotes.map(quote => quote.id));
+
+  // Merge server quotes into local quotes
+  quotes = quotes.filter(quote => !serverQuoteIds.has(quote.id)).concat(serverQuotes);
+
+  // Notify user about the sync
+  notifyUser("Quotes have been synced with the server.");
+  
+  // Update the category filter dropdown
+  populateCategories();
+
+  // Display a new random quote
+  showRandomQuote();
+}
+
+// Function to notify user about updates or conflicts
+function notifyUser(message) {
+  const notification = document.createElement('div');
+  notification.textContent = message;
+  notification.style.backgroundColor = "lightyellow";
+  notification.style.padding = "10px";
+  notification.style.margin = "10px 0";
+  document.body.insertBefore(notification, document.body.firstChild);
+  setTimeout(() => notification.remove(), 5000);
+}
 
 // Function to show a random quote
 function showRandomQuote() {
@@ -34,7 +82,12 @@ function addQuote() {
   const newQuoteCategory = document.getElementById("newQuoteCategory").value;
 
   if (newQuoteText && newQuoteCategory) {
-    quotes.push({ text: newQuoteText, category: newQuoteCategory });
+    const newQuote = {
+      id: quotes.length + 1,
+      text: newQuoteText,
+      category: newQuoteCategory
+    };
+    quotes.push(newQuote);
     populateCategories();
     document.getElementById("newQuoteText").value = "";
     document.getElementById("newQuoteCategory").value = "";
@@ -83,3 +136,6 @@ document.getElementById("newQuote").addEventListener("click", showRandomQuote);
 createAddQuoteForm();
 populateCategories();
 filterQuotes();
+
+// Periodically sync quotes with the server
+setInterval(syncQuotes, SYNC_INTERVAL);
