@@ -33,7 +33,7 @@ async function syncQuotes() {
   quotes = quotes.filter(quote => !serverQuoteIds.has(quote.id)).concat(serverQuotes);
 
   // Notify user about the sync
-  notifyUser("Quotes have been synced with the server.");
+  notifyUser("Quotes synced with server!");
   
   // Update the category filter dropdown
   populateCategories();
