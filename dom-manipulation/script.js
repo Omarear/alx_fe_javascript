@@ -42,6 +42,24 @@ async function syncQuotes() {
   showRandomQuote();
 }
 
+// Function to send a new quote to the server
+async function sendQuoteToServer(quote) {
+  try {
+    const response = await fetch(SERVER_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(quote)
+    });
+    if (!response.ok) {
+      throw new Error("Failed to send quote to the server.");
+    }
+  } catch (error) {
+    console.error("Error sending quote to the server:", error);
+  }
+}
+
 // Function to notify user about updates or conflicts
 function notifyUser(message) {
   const notification = document.createElement('div');
@@ -77,7 +95,7 @@ function createAddQuoteForm() {
 }
 
 // Function to add a new quote
-function addQuote() {
+async function addQuote() {
   const newQuoteText = document.getElementById("newQuoteText").value;
   const newQuoteCategory = document.getElementById("newQuoteCategory").value;
 
@@ -88,6 +106,7 @@ function addQuote() {
       category: newQuoteCategory
     };
     quotes.push(newQuote);
+    await sendQuoteToServer(newQuote); // Send the new quote to the server
     populateCategories();
     document.getElementById("newQuoteText").value = "";
     document.getElementById("newQuoteCategory").value = "";
