@@ -10,7 +10,7 @@ function showRandomQuote() {
   const randomIndex = Math.floor(Math.random() * quotes.length);
   const randomQuote = quotes[randomIndex];
   const quoteDisplay = document.getElementById("quoteDisplay");
-  quoteDisplay.innerText = `${randomQuote.text} - ${randomQuote.category}`;
+  quoteDisplay.innerHTML = `${randomQuote.text} - ${randomQuote.category}`;
 }
 
 // Add event listener to "Show New Quote" button
